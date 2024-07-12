@@ -7,6 +7,7 @@ import org.example.model.response.RegisterResponse;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ApiControllerStub implements Controller {
@@ -68,6 +69,8 @@ public class ApiControllerStub implements Controller {
         return enemyBaseBlock;
     }
 
+    private long turn = 0L;
+
     @Override
     public UnitsResponse getUnitsInfo() {
         UnitsResponse unitsResponse = new UnitsResponse();
@@ -91,11 +94,15 @@ public class ApiControllerStub implements Controller {
                 getEnemyBaseBlock()
         );
 
+        unitsResponse.turn = turn++;
+
         return unitsResponse;
     }
 
     @Override
     public CommandResponse command(AllRequest allRequest) {
-        return null;
+        CommandResponse commandResponse = new CommandResponse();
+        commandResponse.errors = Collections.emptyList();
+        return commandResponse;
     }
 }
