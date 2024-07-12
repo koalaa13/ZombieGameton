@@ -46,13 +46,19 @@ public class ApiControllerStub implements Controller {
         myBaseBlock.attack = 10;
         myBaseBlock.health = 100;
         myBaseBlock.isHead = true;
-        myBaseBlock.lastAttack = new Point();
-        myBaseBlock.lastAttack.x = 2;
-        myBaseBlock.lastAttack.y = 2;
+        myBaseBlock.lastAttack = new Point(2, 2);
         myBaseBlock.range = 5;
         myBaseBlock.x = 3;
         myBaseBlock.y = 1;
         return myBaseBlock;
+    }
+
+    private MyBaseBlock getMyBaseBlock2(int x, int y) {
+        MyBaseBlock block = getMyBaseBlock();
+        block.isHead = false;
+        block.x = x;
+        block.y = y;
+        return block;
     }
 
     private EnemyBaseBlock getEnemyBaseBlock() {
@@ -61,9 +67,7 @@ public class ApiControllerStub implements Controller {
         enemyBaseBlock.attack = 10;
         enemyBaseBlock.health = 100;
         enemyBaseBlock.isHead = true;
-        enemyBaseBlock.lastAttack = new Point();
-        enemyBaseBlock.lastAttack.x = 2;
-        enemyBaseBlock.lastAttack.y = 2;
+        enemyBaseBlock.lastAttack = new Point(2, 2);
         enemyBaseBlock.x = 1;
         enemyBaseBlock.y = 3;
         return enemyBaseBlock;
@@ -87,7 +91,7 @@ public class ApiControllerStub implements Controller {
         );
 
         unitsResponse.base = List.of(
-                getMyBaseBlock()
+                getMyBaseBlock(), getMyBaseBlock2(4, 1), getMyBaseBlock2(3, 0)
         );
 
         unitsResponse.enemyBlocks = List.of(

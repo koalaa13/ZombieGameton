@@ -64,7 +64,7 @@ public class Visualizer extends JFrame {
                 int y = e.getY() - getInsets().top;
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     buildBlock(x, y);
-                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
                     moveBase(x, y);
                 }
                 repaint();
