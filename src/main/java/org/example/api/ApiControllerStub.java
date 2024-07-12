@@ -34,8 +34,8 @@ public class ApiControllerStub implements Controller {
         zombie.speed = 10;
         zombie.type = Zombie.Type.normal;
         zombie.waitTurns = 1;
-        zombie.x = 1;
-        zombie.y = 1;
+        zombie.x = 5;
+        zombie.y = 5;
         return zombie;
     }
 
@@ -49,7 +49,7 @@ public class ApiControllerStub implements Controller {
         myBaseBlock.lastAttack.x = 2;
         myBaseBlock.lastAttack.y = 2;
         myBaseBlock.range = 5;
-        myBaseBlock.x = 1;
+        myBaseBlock.x = 3;
         myBaseBlock.y = 1;
         return myBaseBlock;
     }

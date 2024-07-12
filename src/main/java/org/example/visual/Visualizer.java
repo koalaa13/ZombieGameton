@@ -1,6 +1,8 @@
 package org.example.visual;
 
 
+import org.example.model.Spot;
+import org.example.model.Zombie;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
@@ -21,6 +23,7 @@ public class Visualizer extends JFrame {
         FUTURE_BASE(50, 50, 150),
         ENEMY_BLOCK(50, 0, 0),
         ENEMY_BASE(0, 0, 50),
+        WALL(50, 50, 50),
         ZPOT(50, 150, 50);
 
         int r;
@@ -50,11 +53,10 @@ public class Visualizer extends JFrame {
     private int shiftX;
     private int shiftY;
 
-    public Visualizer(ZpotsResponse world, UnitsResponse game) {
+    public Visualizer(ZpotsResponse world) {
         super("canvas");
 
         this.world = world;
-        this.game = game;
 
         setSize(W + W2, H);
 
@@ -117,7 +119,7 @@ public class Visualizer extends JFrame {
             }
         }
         for (var zp : world.zpots) {
-            tryFillField((int) zp.x, (int) zp.y, Obj.ZPOT);
+            tryFillField((int) zp.x, (int) zp.y, zp.type == Spot.Type.DEFAULT ? Obj.ZPOT : Obj.WALL);
         }
         for (var block : game.base) {
             Obj o = block.isHead ? Obj.BASE : Obj.BLOCK;
@@ -130,6 +132,10 @@ public class Visualizer extends JFrame {
     }
 
     private synchronized void paintImpl(Graphics g) {
+        if (game == null) {
+            System.err.println("Cannot draw. No game info");
+            return;
+        }
         g.setColor(new Color(50, 50, 50));
         for (int i = 0; i < W; i += cellS) {
             g.drawRect(i, 0, 1, H);
@@ -137,37 +143,70 @@ public class Visualizer extends JFrame {
         for (int i = 0; i < H; i += cellS) {
             g.drawRect(0, i, W, 1);
         }
-        initField();
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
                 Obj o = field[i][j];
                 g.setColor(new Color(o.r, o.g, o.b));
-                g.drawRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
+                g.fillRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
             }
         }
+    }
+
+    private boolean checkBuild(int realX, int realY) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (field[realX + i][realY + j] == Obj.ENEMY_BASE || field[realX + i][realY + j] == Obj.ENEMY_BLOCK) {
+                    return false;
+                }
+            }
+        }
+        for (int i = -1; i <= 1; i++) {
+            if (field[realX + i][realY] == Obj.ZPOT || field[realX + i][realY] == Obj.WALL) return false;
+            if (field[realX][realY + i] == Obj.ZPOT || field[realX][realY + i] == Obj.WALL) return false;
+        }
+        return true;
     }
 
     private void buildBlock(int x, int y) {
         int realX = x / cellS;
         int realY = y / cellS;
-        field[realX][realY] = Obj.FUTURE_BLOCK;
+        if (field[realX][realY] == Obj.EMPTY) {
+            if (checkBuild(realX, realY)) {
+                field[realX][realY] = Obj.FUTURE_BLOCK;
+            } else {
+                System.err.println("Check buildBlock failed");
+            }
+        } else if (field[realX][realY] == Obj.FUTURE_BLOCK) {
+            field[realX][realY] = Obj.EMPTY;
+        } else {
+            System.err.println("Invalid buildBlock request");
+        }
     }
 
     private void moveBase(int x, int y) {
         int realX = x / cellS;
         int realY = y / cellS;
-        field[realX][realY] = Obj.FUTURE_BASE;
+        if (field[realX][realY] == Obj.BLOCK) {
+            field[realX][realY] = Obj.FUTURE_BASE;
+        } else if (field[realX][realY] == Obj.FUTURE_BASE) {
+            field[realX][realY] = Obj.BLOCK;
+        } else {
+            System.err.println("Invalid moveBase request");
+        }
     }
 
     public void setGame(UnitsResponse game) {
         this.game = game;
+        initField();
         repaint();
     }
 
     public Point getFutureBase() {
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
-                if (field[i][j] == Obj.FUTURE_BASE) return new Point(i + shiftX, j + shiftY);
+                if (field[i][j] == Obj.FUTURE_BASE) {
+                    return new Point(i + shiftX, j + shiftY);
+                }
             }
         }
         return null;
@@ -177,7 +216,7 @@ public class Visualizer extends JFrame {
         List<Point> blocks = new ArrayList<>();
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
-                if (field[i][j] == Obj.FUTURE_BASE) {
+                if (field[i][j] == Obj.FUTURE_BLOCK) {
                     blocks.add(new Point(i + shiftX, j + shiftY));
                 }
             }
