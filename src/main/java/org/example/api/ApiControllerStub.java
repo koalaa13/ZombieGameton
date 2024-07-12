@@ -81,7 +81,7 @@ public class ApiControllerStub implements Controller {
 
         unitsResponse.player = new Player();
         unitsResponse.player.enemyBlockKills = 100;
-        unitsResponse.player.gold = 100;
+        unitsResponse.player.gold = 2;
         unitsResponse.player.points = 100;
         unitsResponse.player.zombieKills = 100;
         unitsResponse.turn = 1;
@@ -91,7 +91,8 @@ public class ApiControllerStub implements Controller {
         );
 
         unitsResponse.base = List.of(
-                getMyBaseBlock(), getMyBaseBlock2(4, 1), getMyBaseBlock2(3, 0)
+                getMyBaseBlock(), getMyBaseBlock2(4, 1),
+                getMyBaseBlock2(3, 0), getMyBaseBlock2(3, 20)
         );
 
         unitsResponse.enemyBlocks = List.of(

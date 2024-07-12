@@ -184,9 +184,20 @@ public class Visualizer extends JFrame {
         }
         boolean good = false;
         for (int i = -1; i <= 1; i++) {
-            if (field[realX + i][realY] == Obj.BASE || field[realX + i][realY] == Obj.BLOCK) good = true;
-            if (field[realX][realY + i] == Obj.BASE || field[realX][realY + i] == Obj.BLOCK) good = true;
+            if (field[realX + i][realY] == Obj.BASE || field[realX + i][realY] == Obj.BLOCK ||
+                    field[realX + i][realY] == Obj.FUTURE_BASE) good = true;
+            if (field[realX][realY + i] == Obj.BASE || field[realX][realY + i] == Obj.BLOCK ||
+                    field[realX][realY + i] == Obj.FUTURE_BASE) good = true;
         }
+        int spentGold = 0;
+        for (int i = 0; i < field.length; i++) {
+            for (int j = 0; j < field[i].length; j++) {
+                if (field[i][j] == Obj.FUTURE_BLOCK) {
+                    spentGold++;
+                }
+            }
+        }
+        good &= spentGold < game.player.gold;
         return good;
     }
 
@@ -209,6 +220,17 @@ public class Visualizer extends JFrame {
         }
     }
 
+    private boolean checkNoMoves() {
+        for (int i = 0; i < field.length; i++) {
+            for (int j = 0; j < field[i].length; j++) {
+                if (field[i][j] == Obj.FUTURE_BASE) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private void moveBase(int x, int y) {
         int realX = x / cellS;
         int realY = y / cellS;
@@ -216,7 +238,11 @@ public class Visualizer extends JFrame {
             return;
         }
         if (field[realX][realY] == Obj.BLOCK) {
-            field[realX][realY] = Obj.FUTURE_BASE;
+            if (checkNoMoves()) {
+                field[realX][realY] = Obj.FUTURE_BASE;
+            } else {
+                System.err.println("Check moveBase failed");
+            }
         } else if (field[realX][realY] == Obj.FUTURE_BASE) {
             field[realX][realY] = Obj.BLOCK;
         } else {
