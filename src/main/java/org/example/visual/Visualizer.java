@@ -16,24 +16,20 @@ import java.util.List;
 
 public class Visualizer extends JFrame {
     private enum Obj {
-        EMPTY(220, 220, 220),
-        BLOCK(250, 150, 150),
-        FUTURE_BLOCK(150, 50, 50),
-        BASE(150, 150, 250),
-        FUTURE_BASE(50, 50, 150),
-        ENEMY_BLOCK(50, 0, 0),
-        ENEMY_BASE(0, 0, 50),
-        WALL(50, 50, 50),
-        ZPOT(50, 150, 50);
+        EMPTY(new Color(220, 220, 220)),
+        BLOCK(new Color(250, 150, 150)),
+        FUTURE_BLOCK(new Color(150, 50, 50)),
+        BASE(new Color(150, 150, 250)),
+        FUTURE_BASE(new Color(50, 50, 150)),
+        ENEMY_BLOCK(new Color(50, 0, 0)),
+        ENEMY_BASE(new Color(0, 0, 50)),
+        WALL(new Color(50, 50, 50)),
+        ZPOT(new Color(50, 150, 50));
 
-        int r;
-        int g;
-        int b;
+        Color c;
 
-        Obj(int r, int g, int b) {
-            this.r = r;
-            this.g = g;
-            this.b = b;
+        Obj(Color c) {
+            this.c = c;
         }
     }
 
@@ -62,10 +58,12 @@ public class Visualizer extends JFrame {
 
         addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY() - getInsets().top;
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    buildBlock(e.getX(), e.getY());
+                    buildBlock(x, y);
                 } else if (e.getButton() == MouseEvent.BUTTON2) {
-                    moveBase(e.getX(), e.getY());
+                    moveBase(x, y);
                 }
                 repaint();
             }
@@ -84,7 +82,6 @@ public class Visualizer extends JFrame {
         });
 
         canvas = new JPanel() {
-            // paint the canvas
             public void paint(Graphics g) {
                 paintImpl(g);
             }
@@ -145,8 +142,7 @@ public class Visualizer extends JFrame {
         }
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
-                Obj o = field[i][j];
-                g.setColor(new Color(o.r, o.g, o.b));
+                g.setColor(field[i][j].c);
                 g.fillRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
             }
         }
