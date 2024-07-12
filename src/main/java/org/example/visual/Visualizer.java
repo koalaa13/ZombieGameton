@@ -50,6 +50,7 @@ public class Visualizer extends JFrame {
 
     private int shiftX;
     private int shiftY;
+    private boolean freeze = false;
 
     public Visualizer(ZpotsResponse world) {
         super("canvas");
@@ -60,14 +61,16 @@ public class Visualizer extends JFrame {
 
         addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
+                if (freeze) return;
                 int x = e.getX();
                 int y = e.getY() - getInsets().top;
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     buildBlock(x, y);
+                    repaint();
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     moveBase(x, y);
+                    repaint();
                 }
-                repaint();
             }
 
             public void mouseEntered(MouseEvent arg0) {
@@ -101,7 +104,7 @@ public class Visualizer extends JFrame {
         }
     }
 
-    private void initField() {
+    private synchronized void initField() {
         int minX = game.base.stream().map(b -> b.x).min(Comparator.naturalOrder()).get().intValue() - observeSpace;
         int minY = game.base.stream().map(b -> b.y).min(Comparator.naturalOrder()).get().intValue() - observeSpace;
         int maxX = game.base.stream().map(b -> b.x).max(Comparator.naturalOrder()).get().intValue() + observeSpace;
@@ -136,7 +139,8 @@ public class Visualizer extends JFrame {
             return;
         }
         g.setColor(new Color(50, 50, 50));
-        g.drawString("Turn: " + game.turn + "\r\nGold: " + game.player.gold, W + 20, 20);
+        g.drawString("Turn: " + game.turn + "   Gold: " + game.player.gold + (freeze ? "   Frozen" : ""),
+                W + 20, 20);
         for (int i = 0; i < W; i += cellS) {
             g.drawLine(i, 0, i, H);
         }
@@ -253,6 +257,11 @@ public class Visualizer extends JFrame {
     public void setGame(UnitsResponse game) {
         this.game = game;
         initField();
+        repaint();
+    }
+
+    public void setFreeze(boolean freeze) {
+        this.freeze = freeze;
         repaint();
     }
 

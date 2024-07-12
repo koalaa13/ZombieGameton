@@ -40,6 +40,10 @@ public class Main {
 
             visualizer.setGame(unitsResponse);
 
+            visualizer.setFreeze(false);
+            Thread.sleep(1500);
+            visualizer.setFreeze(true);
+
             Point futureBase = visualizer.getFutureBase();
             boolean moveBase = futureBase != null;
 
@@ -63,7 +67,6 @@ public class Main {
             }
 
             System.out.println("----------------------------------------------");
-            Thread.sleep(5000);
         }
     }
 }
