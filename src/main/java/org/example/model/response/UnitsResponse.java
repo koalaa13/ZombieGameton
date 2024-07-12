@@ -12,4 +12,5 @@ public class UnitsResponse {
     public List<EnemyBaseBlock> enemyBlocks;
     public Player player;
     public List<Zombie> zombies;
+    public long turn;
 }

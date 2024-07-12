@@ -1,13 +1,15 @@
 package org.example.visual;
 
 
+import org.example.model.Point;
 import org.example.model.Spot;
-import org.example.model.Zombie;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -17,14 +19,14 @@ import java.util.List;
 public class Visualizer extends JFrame {
     private enum Obj {
         EMPTY(new Color(220, 220, 220)),
-        BLOCK(new Color(250, 150, 150)),
-        FUTURE_BLOCK(new Color(150, 50, 50)),
-        BASE(new Color(150, 150, 250)),
-        FUTURE_BASE(new Color(50, 50, 150)),
-        ENEMY_BLOCK(new Color(50, 0, 0)),
-        ENEMY_BASE(new Color(0, 0, 50)),
+        BLOCK(new Color(150, 50, 50)),
+        FUTURE_BLOCK(new Color(230, 150, 150)),
+        BASE(new Color(50, 50, 150)),
+        FUTURE_BASE(new Color(150, 150, 230)),
+        ENEMY_BLOCK(new Color(250, 0, 0)),
+        ENEMY_BASE(new Color(0, 0, 250)),
         WALL(new Color(50, 50, 50)),
-        ZPOT(new Color(50, 150, 50));
+        ZPOT(new Color(0, 130, 0));
 
         Color c;
 
@@ -100,10 +102,10 @@ public class Visualizer extends JFrame {
     }
 
     private void initField() {
-        int minX = (int) (game.base.stream().map(b -> b.x).min(Comparator.naturalOrder()).get() - observeSpace);
-        int minY = (int) (game.base.stream().map(b -> b.y).min(Comparator.naturalOrder()).get() - observeSpace);
-        int maxX = (int) (game.base.stream().map(b -> b.x).max(Comparator.naturalOrder()).get() + observeSpace);
-        int maxY = (int) (game.base.stream().map(b -> b.y).max(Comparator.naturalOrder()).get() + observeSpace);
+        int minX = game.base.stream().map(b -> b.x).min(Comparator.naturalOrder()).get().intValue() - observeSpace;
+        int minY = game.base.stream().map(b -> b.y).min(Comparator.naturalOrder()).get().intValue() - observeSpace;
+        int maxX = game.base.stream().map(b -> b.x).max(Comparator.naturalOrder()).get().intValue() + observeSpace;
+        int maxY = game.base.stream().map(b -> b.y).max(Comparator.naturalOrder()).get().intValue() + observeSpace;
         shiftX = minX;
         shiftY = minY;
         int sizeX = maxX - minX + 1;
@@ -111,7 +113,7 @@ public class Visualizer extends JFrame {
         cellS = Math.min((W + sizeX - 1) / sizeX, (H + sizeY - 1) / sizeY);
         field = new Obj[sizeX][sizeY];
         for (int i = 0; i < sizeX; i++) {
-            for (int j = 0; j < sizeX; j++) {
+            for (int j = 0; j < sizeY; j++) {
                 field[i][j] = Obj.EMPTY;
             }
         }
@@ -134,6 +136,7 @@ public class Visualizer extends JFrame {
             return;
         }
         g.setColor(new Color(50, 50, 50));
+        g.drawString("Turn: " + game.turn + "\r\nGold: " + game.player.gold, W + 20, 20);
         for (int i = 0; i < W; i += cellS) {
             g.drawRect(i, 0, 1, H);
         }
@@ -148,9 +151,16 @@ public class Visualizer extends JFrame {
         }
     }
 
+    private boolean checkPoint(int x, int y) {
+        return x >= 0 && y >= 0 && x < field.length && y < field[0].length;
+    }
+
     private boolean checkBuild(int realX, int realY) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
+                if (!checkPoint(realX + i, realY + j)) {
+                    return false;
+                }
                 if (field[realX + i][realY + j] == Obj.ENEMY_BASE || field[realX + i][realY + j] == Obj.ENEMY_BLOCK) {
                     return false;
                 }
@@ -166,6 +176,9 @@ public class Visualizer extends JFrame {
     private void buildBlock(int x, int y) {
         int realX = x / cellS;
         int realY = y / cellS;
+        if (!checkPoint(realX, realY)) {
+            return;
+        }
         if (field[realX][realY] == Obj.EMPTY) {
             if (checkBuild(realX, realY)) {
                 field[realX][realY] = Obj.FUTURE_BLOCK;
@@ -182,6 +195,9 @@ public class Visualizer extends JFrame {
     private void moveBase(int x, int y) {
         int realX = x / cellS;
         int realY = y / cellS;
+        if (!checkPoint(realX, realY)) {
+            return;
+        }
         if (field[realX][realY] == Obj.BLOCK) {
             field[realX][realY] = Obj.FUTURE_BASE;
         } else if (field[realX][realY] == Obj.FUTURE_BASE) {

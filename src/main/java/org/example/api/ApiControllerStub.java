@@ -77,6 +77,7 @@ public class ApiControllerStub implements Controller {
         unitsResponse.player.gold = 100;
         unitsResponse.player.points = 100;
         unitsResponse.player.zombieKills = 100;
+        unitsResponse.turn = 1;
 
         unitsResponse.zombies = List.of(
                 getZombie()
