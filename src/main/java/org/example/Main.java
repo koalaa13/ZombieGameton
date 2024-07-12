@@ -19,9 +19,16 @@ public class Main {
         Attacker attacker = new NothingAttacker();
 
         int it = 0;
+        long lastTurn = -1;
         while (true) {
             System.out.println("Iteration #" + it++);
             UnitsResponse unitsResponse = apiController.getUnitsInfo();
+            if (unitsResponse.turn == lastTurn) {
+                Thread.sleep(200);
+                continue;
+            }
+            lastTurn = unitsResponse.turn;
+
             visualizer.setGame(unitsResponse);
 
             Point futureBase = visualizer.getFutureBase();
