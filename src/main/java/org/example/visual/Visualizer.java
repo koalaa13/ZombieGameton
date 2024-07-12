@@ -19,16 +19,16 @@ import java.util.List;
 public class Visualizer extends JFrame {
     private enum Obj {
         EMPTY(new Color(220, 220, 220)),
-        BLOCK(new Color(150, 50, 50)),
-        FUTURE_BLOCK(new Color(230, 150, 150)),
-        BASE(new Color(50, 50, 150)),
-        FUTURE_BASE(new Color(150, 150, 230)),
+        BLOCK(new Color(0, 0, 250)),
+        FUTURE_BLOCK(new Color(200, 200, 250)),
+        BASE(new Color(150, 50, 150)),
+        FUTURE_BASE(new Color(250, 150, 250)),
         ENEMY_BLOCK(new Color(250, 0, 0)),
-        ENEMY_BASE(new Color(0, 0, 250)),
-        WALL(new Color(50, 50, 50)),
-        ZPOT(new Color(0, 130, 0));
+        ENEMY_BASE(new Color(150,50, 50)),
+        WALL(new Color(0, 0, 0)),
+        ZPOT(new Color(0, 100, 0));
 
-        Color c;
+        public final Color c;
 
         Obj(Color c) {
             this.c = c;
@@ -138,16 +138,25 @@ public class Visualizer extends JFrame {
         g.setColor(new Color(50, 50, 50));
         g.drawString("Turn: " + game.turn + "\r\nGold: " + game.player.gold, W + 20, 20);
         for (int i = 0; i < W; i += cellS) {
-            g.drawRect(i, 0, 1, H);
+            g.drawLine(i, 0, i, H);
         }
         for (int i = 0; i < H; i += cellS) {
-            g.drawRect(0, i, W, 1);
+            g.drawLine(0, i, W, i);
         }
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
                 g.setColor(field[i][j].c);
                 g.fillRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
             }
+        }
+        g.setColor(new Color(0, 150, 150));
+        for (var z : game.zombies) {
+            int realX = (int) z.x - shiftX;
+            int realY = (int) z.y - shiftY;
+            int centerX = realX * cellS + 1 + cellS / 2;
+            int centerY = realY * cellS + 1 + cellS / 2;
+            g.drawLine(centerX, centerY,
+                    centerX + z.direction.deltaX() * (cellS / 2), centerY + z.direction.deltaY() * (cellS / 2));
         }
     }
 
@@ -170,7 +179,12 @@ public class Visualizer extends JFrame {
             if (field[realX + i][realY] == Obj.ZPOT || field[realX + i][realY] == Obj.WALL) return false;
             if (field[realX][realY + i] == Obj.ZPOT || field[realX][realY + i] == Obj.WALL) return false;
         }
-        return true;
+        boolean good = false;
+        for (int i = -1; i <= 1; i++) {
+            if (field[realX + i][realY] == Obj.BASE || field[realX + i][realY] == Obj.BLOCK) good = true;
+            if (field[realX][realY + i] == Obj.BASE || field[realX][realY + i] == Obj.BLOCK) good = true;
+        }
+        return good;
     }
 
     private void buildBlock(int x, int y) {
