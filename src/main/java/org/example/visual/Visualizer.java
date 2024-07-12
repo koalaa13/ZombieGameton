@@ -155,6 +155,9 @@ public class Visualizer extends JFrame {
             int realY = (int) z.y - shiftY;
             int centerX = realX * cellS + 1 + cellS / 2;
             int centerY = realY * cellS + 1 + cellS / 2;
+            if (cellS > 6) {
+                g.drawRect(centerX - 3, centerY - 3, 6, 6);
+            }
             g.drawLine(centerX, centerY,
                     centerX + z.direction.deltaX() * (cellS / 2), centerY + z.direction.deltaY() * (cellS / 2));
         }
