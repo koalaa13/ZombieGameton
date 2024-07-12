@@ -2,19 +2,19 @@ package org.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.api.ApiController;
-import org.example.model.Spot;
-import org.example.model.response.UnitsResponse;
-
-import java.util.List;
+import org.example.api.ApiControllerStub;
+import org.example.api.Controller;
+import org.example.visual.Visualizer;
 
 public class Main {
-    public static void main(String[] args) throws JsonProcessingException {
-        ApiController apiController = ApiController.getTestInstance();
-        apiController.register();
-        List<Spot> spots = apiController.getZpots();
-        for (Spot s : spots) {
-            System.out.println(s);
+    public static void main(String[] args) throws JsonProcessingException, InterruptedException {
+        Controller apiController = new ApiControllerStub();
+        Visualizer visualizer = new Visualizer(apiController.getZpots(), apiController.getUnitsInfo());
+        int it = 0;
+        while (true) {
+            visualizer.setGame(apiController.getUnitsInfo());
+            System.out.println("Iteration #" + it++);
+            Thread.sleep(1000);
         }
-        UnitsResponse response = apiController.getUnitsInfo();
     }
 }

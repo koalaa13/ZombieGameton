@@ -19,7 +19,7 @@ import org.example.model.response.ZpotsResponse;
 import java.io.IOException;
 import java.util.List;
 
-public class ApiController {
+public class ApiController implements Controller {
     private static final String TOKEN = "668d4dd964d54668d4dd964d56";
 
     private static final String API_AUTH_HEADER = "X-Auth-Token";
@@ -79,16 +79,13 @@ public class ApiController {
         return null;
     }
 
-    public List<Spot> getZpots() {
+    public ZpotsResponse getZpots() {
         final String url = getApiUrl();
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url + "/play/zombidef/world");
             request.setHeader(API_AUTH_HEADER, TOKEN);
 
-            var res = client.execute(request, response -> responseHandling(response, ZpotsResponse.class));
-            if (res != null) {
-                return res.zpots;
-            }
+            return client.execute(request, response -> responseHandling(response, ZpotsResponse.class));
         } catch (IOException e) {
             System.err.println(e);
         }
