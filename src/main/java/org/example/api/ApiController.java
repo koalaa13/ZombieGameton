@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.example.model.request.AllRequest;
+import org.example.model.response.CommandResponse;
 import org.example.model.response.RegisterResponse;
 import org.example.model.Spot;
 import org.example.model.response.UnitsResponse;
@@ -98,6 +102,23 @@ public class ApiController {
             request.setHeader(API_AUTH_HEADER, TOKEN);
 
             return client.execute(request, response -> responseHandling(response, UnitsResponse.class));
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+        return null;
+    }
+
+    public CommandResponse command(AllRequest allRequest) {
+        final String url = getApiUrl();
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final String json = objectMapper.writeValueAsString(allRequest);
+            final StringEntity entity = new StringEntity(json);
+
+            HttpPost request = new HttpPost(url + "/play/zombidef/command");
+            request.setHeader(API_AUTH_HEADER, TOKEN);
+            request.setEntity(entity);
+
+            return client.execute(request, response -> responseHandling(response, CommandResponse.class));
         } catch (IOException e) {
             System.err.println(e);
         }
