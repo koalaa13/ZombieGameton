@@ -9,12 +9,21 @@ import org.example.model.Point;
 import org.example.model.request.AllRequest;
 import org.example.model.request.AllRequestWithBaseMove;
 import org.example.model.response.CommandResponse;
+import org.example.model.response.RegisterResponse;
 import org.example.model.response.UnitsResponse;
 import org.example.visual.Visualizer;
 
 public class Main {
     public static void main(String[] args) throws JsonProcessingException, InterruptedException {
         Controller apiController = new ApiControllerStub();
+        RegisterResponse registerResponse = apiController.register();
+        if (registerResponse == null) {
+            System.err.println("error happened while registering");
+        } else if (registerResponse.startsInSec > 0) {
+            System.err.println("round haven't started yet, starts in " + registerResponse.startsInSec);
+            return;
+        }
+
         Visualizer visualizer = new Visualizer(apiController.getZpots());
         Attacker attacker = new NothingAttacker();
 
