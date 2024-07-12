@@ -1,11 +1,15 @@
 package org.example.visual;
 
 
+import org.example.model.response.UnitsResponse;
+import org.example.model.response.ZpotsResponse;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Visualizer extends JFrame {
@@ -33,10 +37,11 @@ public class Visualizer extends JFrame {
     private final int W = 1000;
     private final int W2 = 200;
     private final int H = 800;
+    private final int observeSpace = 12;
     private int cellS;
 
-    private Game game = null;
-    private World world;
+    private UnitsResponse game;
+    private final ZpotsResponse world;
 
     private JPanel canvas;
 
@@ -45,10 +50,11 @@ public class Visualizer extends JFrame {
     private int shiftX;
     private int shiftY;
 
-    public Visualizer(World world) {
+    public Visualizer(ZpotsResponse world, UnitsResponse game) {
         super("canvas");
 
         this.world = world;
+        this.game = game;
 
         setSize(W + W2, H);
 
@@ -95,10 +101,10 @@ public class Visualizer extends JFrame {
     }
 
     private void initField() {
-        int minX = game.base.stream().map(getX).min() - 12;
-        int minY = game.base.stream().map(getY).min() - 12;
-        int maxX = game.base.stream().map(getX).max() + 12;
-        int maxY = game.base.stream().map(getY).max() + 12;
+        int minX = (int) (game.base.stream().map(b -> b.x).min(Comparator.naturalOrder()).get() - observeSpace);
+        int minY = (int) (game.base.stream().map(b -> b.y).min(Comparator.naturalOrder()).get() - observeSpace);
+        int maxX = (int) (game.base.stream().map(b -> b.x).max(Comparator.naturalOrder()).get() + observeSpace);
+        int maxY = (int) (game.base.stream().map(b -> b.y).max(Comparator.naturalOrder()).get() + observeSpace);
         shiftX = minX;
         shiftY = minY;
         int sizeX = maxX - minX + 1;
@@ -111,15 +117,15 @@ public class Visualizer extends JFrame {
             }
         }
         for (var zp : world.zpots) {
-            tryFillField(zp.x, zp.y, Obj.ZPOT);
+            tryFillField((int) zp.x, (int) zp.y, Obj.ZPOT);
         }
         for (var block : game.base) {
             Obj o = block.isHead ? Obj.BASE : Obj.BLOCK;
-            tryFillField(block.x, block.y, o);
+            tryFillField((int) block.x, (int) block.y, o);
         }
         for (var block : game.enemyBlocks) {
             Obj o = block.isHead ? Obj.ENEMY_BASE : Obj.ENEMY_BLOCK;
-            tryFillField(block.x, block.y, o);
+            tryFillField((int) block.x, (int) block.y, o);
         }
     }
 
@@ -153,21 +159,26 @@ public class Visualizer extends JFrame {
         field[realX][realY] = Obj.FUTURE_BASE;
     }
 
-    public int getFutureBaseX() {
-        for (int i = 0; i < field.length; i++) {
-            for (int j = 0; j < field[i].length; j++) {
-                if (field[i][j] == Obj.FUTURE_BASE) return i + shiftX;
-            }
-        }
-        return -1;
+    public void setGame(UnitsResponse game) {
+        this.game = game;
+        repaint();
     }
 
-    public List<Integer> getFutureBlocksX() {
-        List<Integer> blocks = new ArrayList<>();
+    public Point getFutureBase() {
+        for (int i = 0; i < field.length; i++) {
+            for (int j = 0; j < field[i].length; j++) {
+                if (field[i][j] == Obj.FUTURE_BASE) return new Point(i + shiftX, j + shiftY);
+            }
+        }
+        return null;
+    }
+
+    public List<Point> getFutureBlocks() {
+        List<Point> blocks = new ArrayList<>();
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
                 if (field[i][j] == Obj.FUTURE_BASE) {
-                    blocks.add(i + shiftX);
+                    blocks.add(new Point(i + shiftX, j + shiftY));
                 }
             }
         }
