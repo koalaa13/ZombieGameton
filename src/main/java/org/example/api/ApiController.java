@@ -12,12 +12,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.example.model.request.AllRequest;
 import org.example.model.response.CommandResponse;
 import org.example.model.response.RegisterResponse;
-import org.example.model.Spot;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
 import java.io.IOException;
-import java.util.List;
 
 public class ApiController implements Controller {
     private static final String TOKEN = "668d4dd964d54668d4dd964d56";
