@@ -150,12 +150,17 @@ public class Visualizer extends JFrame {
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton button2 = new JButton("Build far away");
-        button2.addActionListener(e -> setFarFutureBlocks(1));
+        button2.addActionListener(e -> setFarFutureBlocks(1, false));
         sidePanel.add(button2);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        JButton button3 = new JButton("Build only far away");
+        button3.addActionListener(e -> setFarFutureBlocks(1, true));
+        sidePanel.add(button3);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonNear = new JButton("Build near");
-        buttonNear.addActionListener(e -> setFarFutureBlocks(-1));
+        buttonNear.addActionListener(e -> setFarFutureBlocks(-1, false));
         sidePanel.add(buttonNear);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -465,9 +470,19 @@ public class Visualizer extends JFrame {
         setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
     }
 
-    private void setFarFutureBlocks(int mp) {
+    private void setFarFutureBlocks(int mp, boolean ignoreNear) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))));
+                blocks.sort((o1, o2) -> {
+                    long v1 = mp * Utils.dist(o1, p);
+                    long v2 = mp * Utils.dist(o2, p);
+                    if (0 < v1 && v1 < 25 && ignoreNear) {
+                        v1 -= 1000;
+                    }
+                    if (0 < v2 && v2 < 25 && ignoreNear) {
+                        v2 -= 1000;
+                    }
+                    return (int) (v2 - v1);
+                }));
     }
 
     private void setDirFutureBlocks(int dX, int dY) {
