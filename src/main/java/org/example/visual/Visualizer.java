@@ -2,6 +2,7 @@ package org.example.visual;
 
 
 import org.example.attack.Utils;
+import org.example.model.MyBaseBlock;
 import org.example.model.Point;
 import org.example.model.Spot;
 import org.example.model.Zombie;
@@ -143,7 +144,7 @@ public class Visualizer extends JFrame {
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        JButton button2 = new JButton("Build far away");
+        JButton button2 = new JButton("Build far away (< 20)");
         button2.addActionListener(e -> setFarFutureBlocks());
         sidePanel.add(button2);
 
@@ -206,7 +207,8 @@ public class Visualizer extends JFrame {
             System.err.println("Cannot draw. No game info");
             return;
         }
-        status.setText("Turn: " + game.turn + "   Gold: " + game.player.gold + (freeze ? "   Frozen" : ""));
+        MyBaseBlock base = game.base.stream().filter(b -> b.isHead).findFirst().get();
+        status.setText("Turn=" + game.turn + " Gold=" + game.player.gold + " HP=" + base.health + (freeze ? " F" : ""));
         int rows = field.length;
         int cols = field[0].length;
         g.setColor(new Color(50, 50, 50));
@@ -297,8 +299,6 @@ public class Visualizer extends JFrame {
             } else {
                 System.err.println("Check buildBlock failed");
             }
-//        } else if (field[realX][realY] == Obj.FUTURE_BLOCK) {
-//            field[realX][realY] = Obj.EMPTY;
         } else {
             System.err.println("Invalid buildBlock request");
         }
@@ -327,8 +327,6 @@ public class Visualizer extends JFrame {
             } else {
                 System.err.println("Check moveBase failed");
             }
-        } else if (field[realX][realY] == Obj.FUTURE_BASE) {
-            field[realX][realY] = Obj.BLOCK;
         } else {
             System.err.println("Invalid moveBase request");
         }
@@ -373,7 +371,7 @@ public class Visualizer extends JFrame {
             return;
         }
         consumer.accept(basePoint, blocks);
-        for (int i = 0; i < Math.min(remainGold, blocks.size()); i++) {
+        for (int i = 0; i < Math.min(remainGold, Math.min(blocks.size(), 20)); i++) {
             field[(int) blocks.get(i).x][(int) blocks.get(i).y] = Obj.FUTURE_BLOCK;
         }
         repaint();
