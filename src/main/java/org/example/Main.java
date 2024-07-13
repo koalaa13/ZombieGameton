@@ -1,6 +1,7 @@
 package org.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.example.api.ApiController;
 import org.example.api.ApiControllerStub;
 import org.example.api.Controller;
 import org.example.attack.Attacker;
@@ -16,7 +17,8 @@ import org.example.visual.Visualizer;
 
 public class Main {
     public static void main(String[] args) throws JsonProcessingException, InterruptedException {
-        Controller apiController = new ApiControllerStub();
+        Controller apiController = ApiController.getTestInstance();
+//        apiController = new ApiControllerStub();
         RegisterResponse registerResponse = apiController.register();
         if (registerResponse == null) {
             System.err.println("error happened while registering");
@@ -42,7 +44,7 @@ public class Main {
             visualizer.setGame(unitsResponse);
 
             visualizer.setFreeze(false);
-            Thread.sleep(1500);
+            Thread.sleep(1000);
             visualizer.setFreeze(true);
 
             Point futureBase = visualizer.getFutureBase();
@@ -58,7 +60,7 @@ public class Main {
             allRequest.attack = attacker.makeAttacks(unitsResponse);
 
             CommandResponse commandResponse = apiController.command(allRequest);
-            if (commandResponse.errors.isEmpty()) {
+            if (commandResponse.errors == null || commandResponse.errors.isEmpty()) {
                 System.out.println("all commands were accepted!!!");
             } else {
                 System.out.println("some errors happened:");

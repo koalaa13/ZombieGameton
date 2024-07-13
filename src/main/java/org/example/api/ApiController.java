@@ -58,7 +58,7 @@ public class ApiController implements Controller {
         var content = response.getEntity().getContent();
         if (response.getStatusLine().getStatusCode() != 200) {
             String errorMessage = objectMapper.readTree(content).get("error").asText();
-            System.err.println(errorMessage);
+            System.err.println("Code " + response.getStatusLine().getStatusCode() + ": " + errorMessage);
             return null;
         }
         return objectMapper.readValue(content, okResponseClass);

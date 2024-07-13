@@ -48,7 +48,9 @@ public class PriorityAttacker implements Attacker {
     public List<AttackRequest> makeAttacks(UnitsResponse unitsResponse) {
         List<Point> targets = new ArrayList<>();
         targets.addAll(unitsResponse.zombies);
-        targets.addAll(unitsResponse.enemyBlocks);
+        if (unitsResponse.enemyBlocks != null) {
+            targets.addAll(unitsResponse.enemyBlocks);
+        }
 
         targets.sort(Comparator.comparingLong(p -> -getPriority(p, unitsResponse)));
 

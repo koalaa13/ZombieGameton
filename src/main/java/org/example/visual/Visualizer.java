@@ -183,9 +183,11 @@ public class Visualizer extends JFrame {
             Obj o = block.isHead ? Obj.BASE : Obj.BLOCK;
             tryFillField((int) block.x, (int) block.y, o);
         }
-        for (var block : game.enemyBlocks) {
-            Obj o = block.isHead ? Obj.ENEMY_BASE : Obj.ENEMY_BLOCK;
-            tryFillField((int) block.x, (int) block.y, o);
+        if (game.enemyBlocks != null) {
+            for (var block : game.enemyBlocks) {
+                Obj o = block.isHead ? Obj.ENEMY_BASE : Obj.ENEMY_BLOCK;
+                tryFillField((int) block.x, (int) block.y, o);
+            }
         }
     }
 
