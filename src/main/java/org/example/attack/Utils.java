@@ -52,7 +52,7 @@ public class Utils {
         
         return unitsResponse.base.stream()
                 .filter(bp -> canReachPoint(zombie, bp))
-                .mapToLong(bp -> turnsCountToReachPoint(zombie, bp) + zombie.waitTurns)
+                .mapToLong(bp -> turnsCountToReachPoint(zombie, bp))
                 .min()
                 .orElse(Long.MAX_VALUE);
     }
@@ -93,7 +93,7 @@ public class Utils {
         long diff = zombie.direction == Zombie.Direction.up || zombie.direction == Zombie.Direction.down ?
                 Math.abs(point.y - zombie.y) :
                 Math.abs(point.x - zombie.x);
-        return diff / zombie.speed + (diff % zombie.speed == 0 ? 0 : 1);
+        return diff / zombie.speed + (diff % zombie.speed == 0 ? 0 : 1) + zombie.waitTurns;
     }
 
     public static ZombieDamageCalculator getCorrectCalculator(Zombie zombie) {
