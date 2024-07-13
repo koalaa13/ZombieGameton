@@ -13,6 +13,7 @@ import org.example.model.request.AllRequestWithBaseMove;
 import org.example.model.response.CommandResponse;
 import org.example.model.response.RegisterResponse;
 import org.example.model.response.UnitsResponse;
+import org.example.model.response.ZpotsResponse;
 import org.example.visual.Visualizer;
 
 public class Main {
@@ -30,7 +31,9 @@ public class Main {
             }
         }
 
-        Visualizer visualizer = new Visualizer(apiController.getZpots());
+        ZpotsResponse zpotsResponse = apiController.getZpots();
+
+        Visualizer visualizer = new Visualizer(zpotsResponse);
         Attacker attacker = new PriorityAttacker();
 
         int it = 0;
@@ -42,9 +45,12 @@ public class Main {
                 Thread.sleep(200);
                 continue;
             }
+            if (unitsResponse.turn % 10 == 0) {
+                zpotsResponse = apiController.getZpots();
+            }
             lastTurn = unitsResponse.turn;
 
-            visualizer.setGame(unitsResponse);
+            visualizer.setGame(unitsResponse, zpotsResponse);
 
             visualizer.setFreeze(false);
             Thread.sleep(1000);

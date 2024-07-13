@@ -44,7 +44,7 @@ public class Visualizer extends JFrame {
     private int cellS;
 
     private UnitsResponse game;
-    private final ZpotsResponse world;
+    private ZpotsResponse world;
 
     private JPanel canvas;
     private JLabel status;
@@ -362,8 +362,9 @@ public class Visualizer extends JFrame {
         }
     }
 
-    public synchronized void setGame(UnitsResponse game) {
+    public synchronized void setGame(UnitsResponse game, ZpotsResponse world) {
         this.game = game;
+        this.world = world;
         initField();
         repaint();
     }
@@ -416,7 +417,7 @@ public class Visualizer extends JFrame {
             System.err.println("No base found");
             return;
         }
-        if (denseMode) {
+        if (!denseMode) {
             blocks = blocks.stream().filter(p -> countNeighbours(p) == 1).collect(Collectors.toList());
         }
         consumer.accept(basePoint, blocks);
