@@ -23,7 +23,7 @@ public class PriorityAttacker implements Attacker {
             Zombie.Type.normal, 2000
     );
 
-    private static final Integer BasePriority = 1700;
+    private static final Integer BasePriority = 1800;
 
     private long getPriority(Point target, UnitsResponse unitsResponse) {
         if (target instanceof Zombie zombie) {
@@ -37,7 +37,7 @@ public class PriorityAttacker implements Attacker {
             if (block.isHead) {
                 return BasePriority * 2;
             } else {
-                return BasePriority;
+                return BasePriority - block.health;
             }
         } else {
             return Long.MIN_VALUE;
