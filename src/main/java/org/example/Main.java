@@ -22,9 +22,12 @@ public class Main {
         RegisterResponse registerResponse = apiController.register();
         if (registerResponse == null) {
             System.err.println("error happened while registering");
-        } else if (registerResponse.startsInSec > 0) {
-            System.err.println("round haven't started yet, starts in " + registerResponse.startsInSec);
-            return;
+        } else {
+            while (registerResponse.startsInSec > 0) {
+                System.err.println("round haven't started yet, starts in " + registerResponse.startsInSec);
+                Thread.sleep(1200);
+                registerResponse = apiController.register();
+            }
         }
 
         Visualizer visualizer = new Visualizer(apiController.getZpots());

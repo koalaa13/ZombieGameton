@@ -1,6 +1,7 @@
 package org.example.visual;
 
 
+import org.example.attack.Utils;
 import org.example.model.Point;
 import org.example.model.Spot;
 import org.example.model.Zombie;
@@ -17,6 +18,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class Visualizer extends JFrame {
     private enum Obj {
@@ -37,9 +41,9 @@ public class Visualizer extends JFrame {
         }
     }
 
-    private final int W = 1000;
+    private final int W = 1200;
     private final int W2 = 200;
-    private final int H = 800;
+    private final int H = 1000;
     private int observeSpace = 10;
     private int cellS;
 
@@ -136,6 +140,12 @@ public class Visualizer extends JFrame {
         JButton button = new JButton("Build random");
         button.addActionListener(e -> setRandomFutureBlocks());
         sidePanel.add(button);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        JButton button2 = new JButton("Build far away");
+        button2.addActionListener(e -> setFarFutureBlocks());
+        sidePanel.add(button2);
 
         canvas.setMaximumSize(new Dimension(W, H));
         sidePanel.setMaximumSize(new Dimension(W2, H));
@@ -287,8 +297,8 @@ public class Visualizer extends JFrame {
             } else {
                 System.err.println("Check buildBlock failed");
             }
-        } else if (field[realX][realY] == Obj.FUTURE_BLOCK) {
-            field[realX][realY] = Obj.EMPTY;
+//        } else if (field[realX][realY] == Obj.FUTURE_BLOCK) {
+//            field[realX][realY] = Obj.EMPTY;
         } else {
             System.err.println("Invalid buildBlock request");
         }
@@ -340,25 +350,42 @@ public class Visualizer extends JFrame {
         repaint();
     }
 
-    private synchronized void setRandomFutureBlocks() {
+    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer) {
         int remainGold = (int) game.player.gold - getSpentGold();
         if (remainGold == 0) {
             System.err.println("No gold left");
             return;
         }
         List<Point> blocks = new ArrayList<>();
+        Point basePoint = null;
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
                 if (field[i][j] == Obj.EMPTY && checkBuild(i, j, false)) {
                     blocks.add(new Point(i, j));
                 }
+                if (field[i][j] == Obj.BASE) {
+                    basePoint = new Point(i, j);
+                }
             }
         }
-        Collections.shuffle(blocks);
+        if (basePoint == null) {
+            System.err.println("No base found");
+            return;
+        }
+        consumer.accept(basePoint, blocks);
         for (int i = 0; i < Math.min(remainGold, blocks.size()); i++) {
             field[(int) blocks.get(i).x][(int) blocks.get(i).y] = Obj.FUTURE_BLOCK;
         }
         repaint();
+    }
+
+    private void setRandomFutureBlocks() {
+        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
+    }
+
+    private void setFarFutureBlocks() {
+        setFutureBlocks((p, blocks) ->
+                blocks.sort((o1, o2) -> (int) Utils.dist(o2, p) - (int) Utils.dist(o1, p)));
     }
 
     public Point getFutureBase() {
