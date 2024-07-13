@@ -21,7 +21,10 @@ public class ApiControllerStub implements Controller {
     public ZpotsResponse getZpots() {
         ZpotsResponse zpotsResponse = new ZpotsResponse();
         zpotsResponse.zpots = List.of(
-                new Spot(1, 1, Spot.Type.DEFAULT)
+                new Spot(1, 1, Spot.Type.DEFAULT),
+                new Spot(-1, 1, Spot.Type.WALL),
+                new Spot(-1, 0, Spot.Type.WALL),
+                new Spot(-1, -1, Spot.Type.WALL)
         );
         return zpotsResponse;
     }
@@ -82,6 +85,14 @@ public class ApiControllerStub implements Controller {
         return enemyBaseBlock;
     }
 
+    private EnemyBaseBlock getEnemyBaseBlock2(int x, int y) {
+        EnemyBaseBlock block = getEnemyBaseBlock();
+        block.isHead = false;
+        block.x = x;
+        block.y = y;
+        return block;
+    }
+
     private long turn = 0L;
 
     @Override
@@ -101,11 +112,11 @@ public class ApiControllerStub implements Controller {
 
         unitsResponse.base = List.of(
                 getMyBaseBlock(), getMyBaseBlock2(4, 1),
-                getMyBaseBlock2(3, 0), getMyBaseBlock2(3, 20)
+                getMyBaseBlock2(3, 0), getMyBaseBlock2(15, 3)
         );
 
         unitsResponse.enemyBlocks = List.of(
-                getEnemyBaseBlock()
+                getEnemyBaseBlock(), getEnemyBaseBlock2(1, 4)
         );
 
         unitsResponse.turn = turn++;

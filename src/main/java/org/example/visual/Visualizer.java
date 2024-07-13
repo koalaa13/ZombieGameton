@@ -94,11 +94,34 @@ public class Visualizer extends JFrame {
                 paintImpl(g);
             }
         };
+
         JPanel sidePanel = new JPanel();
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        JPanel legend = new JPanel(new GridLayout(10, 1));
+        legend.add(makeJLabel("Empty", Obj.EMPTY.c));
+        legend.add(makeJLabel("Block", Obj.BLOCK.c));
+        legend.add(makeJLabel("New block", Obj.FUTURE_BLOCK.c));
+        legend.add(makeJLabel("Base", Obj.BASE.c));
+        legend.add(makeJLabel("New base", Obj.FUTURE_BASE.c));
+        legend.add(makeJLabel("Enemy block", Obj.ENEMY_BLOCK.c));
+        legend.add(makeJLabel("Enemy base", Obj.ENEMY_BASE.c));
+        legend.add(makeJLabel("Wall", Obj.WALL.c));
+        legend.add(makeJLabel("Zpot", Obj.ZPOT.c));
+        legend.add(makeJLabel("Zombie", Color.ORANGE));
+        legend.setMaximumSize(new Dimension(W2, H / 3));
+        legend.setBorder(BorderFactory.createEtchedBorder());
+        legend.setBackground(Color.WHITE);
+        sidePanel.add(legend);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
         status = new JLabel();
         sidePanel.add(status);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         JSlider slider = new JSlider(5, 13, observeSpace);
         slider.addChangeListener(e -> setObserveSpace(slider.getValue()));
@@ -106,6 +129,8 @@ public class Visualizer extends JFrame {
         slider.setPaintLabels(true);
         slider.setSnapToTicks(true);
         sidePanel.add(slider);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         JButton button = new JButton("Build random");
         button.addActionListener(e -> setRandomFutureBlocks());
@@ -118,6 +143,12 @@ public class Visualizer extends JFrame {
         add(canvas);
         add(sidePanel);
         show();
+    }
+
+    private JLabel makeJLabel(String text, Color c) {
+        JLabel lbl = new JLabel(text);
+        lbl.setForeground(c);
+        return lbl;
     }
 
     private void tryFillField(int x, int y, Obj cell) {
@@ -183,14 +214,15 @@ public class Visualizer extends JFrame {
             int realY = (int) z.y - shiftY;
             int centerX = realX * cellS + 1 + cellS / 2;
             int centerY = realY * cellS + 1 + cellS / 2;
-            g.setColor(Color.MAGENTA);
-            if (cellS > 8) {
-                g.drawRect(centerX - 4, centerY - 4, 8, 8);
-            }
+            g.setColor(Color.BLACK);
             g.drawLine(centerX, centerY,
                     centerX + z.direction.deltaX() * (cellS / 2), centerY + z.direction.deltaY() * (cellS / 2));
-            if (cellS > 8 && z.type == Zombie.Type.juggernaut) {
-                g.setColor(Color.ORANGE);
+            g.setColor(Color.ORANGE);
+            if (cellS > 10) {
+                g.fillRect(centerX - 5, centerY - 5, 10, 10);
+            }
+            if (cellS > 10 && z.type == Zombie.Type.juggernaut) {
+                g.setColor(Color.MAGENTA);
                 g.fillRect(centerX - 3, centerY - 3, 6, 6);
             }
         }
