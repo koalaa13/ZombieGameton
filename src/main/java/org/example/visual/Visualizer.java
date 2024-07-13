@@ -10,18 +10,12 @@ import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Visualizer extends JFrame {
@@ -61,6 +55,7 @@ public class Visualizer extends JFrame {
     private int shiftY;
     private boolean freeze = false;
     private boolean limitGold = false;
+    private boolean denseMode = false;
 
     public Visualizer(ZpotsResponse world) {
         super("canvas");
@@ -118,7 +113,7 @@ public class Visualizer extends JFrame {
         legend.add(makeJLabel("Wall", Obj.WALL.c));
         legend.add(makeJLabel("Zpot", Obj.ZPOT.c));
         legend.add(makeJLabel("Zombie", Color.ORANGE));
-        legend.setMaximumSize(new Dimension(W2, H / 3));
+        legend.setMaximumSize(new Dimension(W2, H / 4));
         legend.setBorder(BorderFactory.createEtchedBorder());
         legend.setBackground(Color.WHITE);
         sidePanel.add(legend);
@@ -142,6 +137,11 @@ public class Visualizer extends JFrame {
         JCheckBox cb = new JCheckBox("Limit gold (5)");
         cb.addItemListener(e -> setLimitGold(cb.isSelected()));
         sidePanel.add(cb);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        JCheckBox cb2 = new JCheckBox("Dense");
+        cb2.addItemListener(e -> setDenseMode(cb2.isSelected()));
+        sidePanel.add(cb2);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton button = new JButton("Build random");
@@ -391,7 +391,10 @@ public class Visualizer extends JFrame {
         return c;
     }
 
-    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer, boolean filterGroup) {
+    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer) {
+        if (freeze) {
+            return;
+        }
         int remainGold = (int) game.player.gold - getSpentGold();
         if (remainGold == 0) {
             System.err.println("No gold left");
@@ -413,7 +416,7 @@ public class Visualizer extends JFrame {
             System.err.println("No base found");
             return;
         }
-        if (filterGroup) {
+        if (denseMode) {
             blocks = blocks.stream().filter(p -> countNeighbours(p) == 1).collect(Collectors.toList());
         }
         consumer.accept(basePoint, blocks);
@@ -428,20 +431,24 @@ public class Visualizer extends JFrame {
     }
 
     private void setRandomFutureBlocks() {
-        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks), true);
+        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
     }
 
     private void setFarFutureBlocks(int mp) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))), true);
+                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))));
     }
 
     private void setDirFutureBlocks(int dX, int dY) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))), false);
+                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
     }
     private synchronized void setLimitGold(boolean value) {
         this.limitGold = value;
+    }
+
+    private synchronized void setDenseMode(boolean value) {
+        this.denseMode = value;
     }
 
     public Point getFutureBase() {
