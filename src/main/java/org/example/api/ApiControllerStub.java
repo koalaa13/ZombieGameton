@@ -33,10 +33,19 @@ public class ApiControllerStub implements Controller {
         zombie.health = 100;
         zombie.id = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
         zombie.speed = 10;
-        zombie.type = Zombie.Type.normal;
+        zombie.type = Zombie.Type.juggernaut;
         zombie.waitTurns = 1;
         zombie.x = 5;
         zombie.y = 5;
+        return zombie;
+    }
+
+    private Zombie getZombie2() {
+        Zombie zombie = getZombie();
+        zombie.type = Zombie.Type.normal;
+        zombie.x = 5;
+        zombie.y = 7;
+        zombie.direction = Zombie.Direction.left;
         return zombie;
     }
 
@@ -87,7 +96,7 @@ public class ApiControllerStub implements Controller {
         unitsResponse.turn = 1;
 
         unitsResponse.zombies = List.of(
-                getZombie()
+                getZombie(), getZombie2()
         );
 
         unitsResponse.base = List.of(

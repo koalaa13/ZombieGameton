@@ -3,6 +3,7 @@ package org.example.visual;
 
 import org.example.model.Point;
 import org.example.model.Spot;
+import org.example.model.Zombie;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
@@ -177,17 +178,21 @@ public class Visualizer extends JFrame {
                 g.fillRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
             }
         }
-        g.setColor(new Color(0, 150, 150));
         for (var z : game.zombies) {
             int realX = (int) z.x - shiftX;
             int realY = (int) z.y - shiftY;
             int centerX = realX * cellS + 1 + cellS / 2;
             int centerY = realY * cellS + 1 + cellS / 2;
-            if (cellS > 6) {
-                g.drawRect(centerX - 3, centerY - 3, 6, 6);
+            g.setColor(Color.MAGENTA);
+            if (cellS > 8) {
+                g.drawRect(centerX - 4, centerY - 4, 8, 8);
             }
             g.drawLine(centerX, centerY,
                     centerX + z.direction.deltaX() * (cellS / 2), centerY + z.direction.deltaY() * (cellS / 2));
+            if (cellS > 8 && z.type == Zombie.Type.juggernaut) {
+                g.setColor(Color.ORANGE);
+                g.fillRect(centerX - 3, centerY - 3, 6, 6);
+            }
         }
     }
 
