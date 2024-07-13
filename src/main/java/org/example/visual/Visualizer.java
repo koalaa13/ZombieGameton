@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Visualizer extends JFrame {
     private enum Obj {
@@ -377,7 +378,20 @@ public class Visualizer extends JFrame {
         repaint();
     }
 
-    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer) {
+    private boolean isOur(int x, int y) {
+        return field[x][y] == Obj.BASE || field[x][y] == Obj.BLOCK;
+    }
+
+    private int countNeighbours(Point p) {
+        int c = 0;
+        if (isOur((int) p.x - 1, (int) p.y)) c++;
+        if (isOur((int) p.x + 1, (int) p.y)) c++;
+        if (isOur((int) p.x, (int) p.y - 1)) c++;
+        if (isOur((int) p.x, (int) p.y + 1)) c++;
+        return c;
+    }
+
+    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer, boolean filterGroup) {
         int remainGold = (int) game.player.gold - getSpentGold();
         if (remainGold == 0) {
             System.err.println("No gold left");
@@ -399,6 +413,9 @@ public class Visualizer extends JFrame {
             System.err.println("No base found");
             return;
         }
+        if (filterGroup) {
+            blocks = blocks.stream().filter(p -> countNeighbours(p) == 1).collect(Collectors.toList());
+        }
         consumer.accept(basePoint, blocks);
         int lim = Math.min(remainGold, blocks.size());
         if (limitGold) {
@@ -411,17 +428,17 @@ public class Visualizer extends JFrame {
     }
 
     private void setRandomFutureBlocks() {
-        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
+        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks), true);
     }
 
     private void setFarFutureBlocks(int mp) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))));
+                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))), true);
     }
 
     private void setDirFutureBlocks(int dX, int dY) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
+                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))), false);
     }
     private synchronized void setLimitGold(boolean value) {
         this.limitGold = value;
