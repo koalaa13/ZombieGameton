@@ -59,6 +59,7 @@ public class Visualizer extends JFrame {
     private int shiftX;
     private int shiftY;
     private boolean freeze = false;
+    private boolean limitGold = false;
 
     public Visualizer(ZpotsResponse world) {
         super("canvas");
@@ -103,7 +104,7 @@ public class Visualizer extends JFrame {
         JPanel sidePanel = new JPanel();
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         JPanel legend = new JPanel(new GridLayout(10, 1));
         legend.add(makeJLabel("Empty", Obj.EMPTY.c));
@@ -121,12 +122,12 @@ public class Visualizer extends JFrame {
         legend.setBackground(Color.WHITE);
         sidePanel.add(legend);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         status = new JLabel();
         sidePanel.add(status);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         JSlider slider = new JSlider(5, 26, observeSpace);
         slider.addChangeListener(e -> setObserveSpace(slider.getValue()));
@@ -136,37 +137,42 @@ public class Visualizer extends JFrame {
         slider.setSnapToTicks(true);
         sidePanel.add(slider);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        JCheckBox cb = new JCheckBox("Limit gold (20)");
+        cb.addItemListener(e -> setLimitGold(cb.isSelected()));
+        sidePanel.add(cb);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton button = new JButton("Build random");
         button.addActionListener(e -> setRandomFutureBlocks());
         sidePanel.add(button);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton button2 = new JButton("Build far away");
         button2.addActionListener(e -> setFarFutureBlocks(1));
         sidePanel.add(button2);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonNear = new JButton("Build near");
         buttonNear.addActionListener(e -> setFarFutureBlocks(-1));
         sidePanel.add(buttonNear);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonLeft = new JButton("Build left");
         buttonLeft.addActionListener(e -> setDirFutureBlocks(-1, 0));
         sidePanel.add(buttonLeft);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonRight = new JButton("Build right");
         buttonRight.addActionListener(e -> setDirFutureBlocks(1, 0));
         sidePanel.add(buttonRight);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonUp = new JButton("Build up");
         buttonUp.addActionListener(e -> setDirFutureBlocks(0, -1));
         sidePanel.add(buttonUp);
 
-        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
         JButton buttonDown = new JButton("Build down");
         buttonDown.addActionListener(e -> setDirFutureBlocks(0, 1));
         sidePanel.add(buttonDown);
@@ -394,7 +400,11 @@ public class Visualizer extends JFrame {
             return;
         }
         consumer.accept(basePoint, blocks);
-        for (int i = 0; i < Math.min(remainGold, Math.min(blocks.size(), 20)); i++) {
+        int lim = Math.min(remainGold, blocks.size());
+        if (limitGold) {
+            lim = Math.min(lim, 1);
+        }
+        for (int i = 0; i < lim; i++) {
             field[(int) blocks.get(i).x][(int) blocks.get(i).y] = Obj.FUTURE_BLOCK;
         }
         repaint();
@@ -412,6 +422,9 @@ public class Visualizer extends JFrame {
     private void setDirFutureBlocks(int dX, int dY) {
         setFutureBlocks((p, blocks) ->
                 blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
+    }
+    private synchronized void setLimitGold(boolean value) {
+        this.limitGold = value;
     }
 
     public Point getFutureBase() {
