@@ -16,6 +16,7 @@ import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ApiController implements Controller {
     private static final String TOKEN = "668d4dd964d54668d4dd964d56";
@@ -83,7 +84,11 @@ public class ApiController implements Controller {
             HttpGet request = new HttpGet(url + "/play/zombidef/world");
             request.setHeader(API_AUTH_HEADER, TOKEN);
 
-            return client.execute(request, response -> responseHandling(response, ZpotsResponse.class));
+            var resp = client.execute(request, response -> responseHandling(response, ZpotsResponse.class));
+            if (resp.zpots == null) {
+                resp.zpots = new ArrayList<>();
+            }
+            return resp;
         } catch (IOException e) {
             System.err.println(e);
         }
@@ -96,7 +101,17 @@ public class ApiController implements Controller {
             HttpGet request = new HttpGet(url + "/play/zombidef/units");
             request.setHeader(API_AUTH_HEADER, TOKEN);
 
-            return client.execute(request, response -> responseHandling(response, UnitsResponse.class));
+            var resp = client.execute(request, response -> responseHandling(response, UnitsResponse.class));
+            if (resp.enemyBlocks == null) {
+                resp.enemyBlocks = new ArrayList<>();
+            }
+            if (resp.base == null) {
+                resp.base = new ArrayList<>();
+            }
+            if(resp.zombies == null) {
+                resp.zombies = new ArrayList<>();
+            }
+            return resp;
         } catch (IOException e) {
             System.err.println(e);
         }
