@@ -1,6 +1,6 @@
 package org.example.attack.damage.impl;
 
-import org.example.attack.damage.DyingAfterAttackZombieDamageCalculator;
+import org.example.attack.damage.NotDyingAfterAttackZombieDamageCalculator;
 import org.example.model.MyBaseBlock;
 import org.example.model.Zombie;
 import org.example.model.response.UnitsResponse;
@@ -8,7 +8,7 @@ import org.example.model.response.UnitsResponse;
 import java.util.Collections;
 import java.util.List;
 
-public class ChaosKnightZombieDamageCalculator extends DyingAfterAttackZombieDamageCalculator {
+public class ChaosKnightZombieDamageCalculator extends NotDyingAfterAttackZombieDamageCalculator {
     @Override
     public Zombie.Type getType() {
         return Zombie.Type.chaos_knight;
