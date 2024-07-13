@@ -123,9 +123,10 @@ public class Visualizer extends JFrame {
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        JSlider slider = new JSlider(5, 13, observeSpace);
+        JSlider slider = new JSlider(5, 26, observeSpace);
         slider.addChangeListener(e -> setObserveSpace(slider.getValue()));
-        slider.setMajorTickSpacing(1);
+        slider.setMajorTickSpacing(3);
+        slider.setMinorTickSpacing(1);
         slider.setPaintLabels(true);
         slider.setSnapToTicks(true);
         sidePanel.add(slider);
@@ -154,7 +155,7 @@ public class Visualizer extends JFrame {
     private void tryFillField(int x, int y, Obj cell) {
         int realX = x - shiftX;
         int realY = y - shiftY;
-        if (realX < field.length && realY < field[0].length) {
+        if (checkPoint(realX, realY)) {
             field[realX][realY] = cell;
         }
     }

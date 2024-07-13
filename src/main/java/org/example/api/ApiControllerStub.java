@@ -21,6 +21,10 @@ public class ApiControllerStub implements Controller {
     public ZpotsResponse getZpots() {
         ZpotsResponse zpotsResponse = new ZpotsResponse();
         zpotsResponse.zpots = List.of(
+                new Spot(-20, 5, Spot.Type.DEFAULT),
+                new Spot(20, 30, Spot.Type.DEFAULT),
+                new Spot(25, -3, Spot.Type.DEFAULT),
+                new Spot(-7, -12, Spot.Type.DEFAULT),
                 new Spot(1, 1, Spot.Type.DEFAULT),
                 new Spot(-1, 1, Spot.Type.WALL),
                 new Spot(-1, 0, Spot.Type.WALL),
