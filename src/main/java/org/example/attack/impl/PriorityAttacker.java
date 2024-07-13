@@ -34,7 +34,7 @@ public class PriorityAttacker implements Attacker {
                 return -zombie.health;
             }
         } else if (target instanceof EnemyBaseBlock block) {
-            if (block.isHead) {
+            if (block.isHead()) {
                 return BasePriority * 2;
             } else {
                 return BasePriority - block.health;

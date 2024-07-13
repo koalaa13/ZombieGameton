@@ -190,12 +190,12 @@ public class Visualizer extends JFrame {
             tryFillField((int) zp.x, (int) zp.y, zp.type == Spot.Type.DEFAULT ? Obj.ZPOT : Obj.WALL);
         }
         for (var block : game.base) {
-            Obj o = block.isHead ? Obj.BASE : Obj.BLOCK;
+            Obj o = block.isHead() ? Obj.BASE : Obj.BLOCK;
             tryFillField((int) block.x, (int) block.y, o);
         }
         if (game.enemyBlocks != null) {
             for (var block : game.enemyBlocks) {
-                Obj o = block.isHead ? Obj.ENEMY_BASE : Obj.ENEMY_BLOCK;
+                Obj o = block.isHead() ? Obj.ENEMY_BASE : Obj.ENEMY_BLOCK;
                 tryFillField((int) block.x, (int) block.y, o);
             }
         }
