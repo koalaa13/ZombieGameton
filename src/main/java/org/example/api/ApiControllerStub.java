@@ -21,7 +21,14 @@ public class ApiControllerStub implements Controller {
     public ZpotsResponse getZpots() {
         ZpotsResponse zpotsResponse = new ZpotsResponse();
         zpotsResponse.zpots = List.of(
-                new Spot(1, 1, Spot.Type.DEFAULT)
+                new Spot(-20, 5, Spot.Type.DEFAULT),
+                new Spot(20, 30, Spot.Type.DEFAULT),
+                new Spot(25, -3, Spot.Type.DEFAULT),
+                new Spot(-7, -12, Spot.Type.DEFAULT),
+                new Spot(1, 1, Spot.Type.DEFAULT),
+                new Spot(-1, 1, Spot.Type.WALL),
+                new Spot(-1, 0, Spot.Type.WALL),
+                new Spot(-1, -1, Spot.Type.WALL)
         );
         return zpotsResponse;
     }
@@ -33,10 +40,19 @@ public class ApiControllerStub implements Controller {
         zombie.health = 100;
         zombie.id = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
         zombie.speed = 10;
-        zombie.type = Zombie.Type.normal;
+        zombie.type = Zombie.Type.juggernaut;
         zombie.waitTurns = 1;
         zombie.x = 5;
         zombie.y = 5;
+        return zombie;
+    }
+
+    private Zombie getZombie2() {
+        Zombie zombie = getZombie();
+        zombie.type = Zombie.Type.normal;
+        zombie.x = 5;
+        zombie.y = 7;
+        zombie.direction = Zombie.Direction.left;
         return zombie;
     }
 
@@ -73,6 +89,14 @@ public class ApiControllerStub implements Controller {
         return enemyBaseBlock;
     }
 
+    private EnemyBaseBlock getEnemyBaseBlock2(int x, int y) {
+        EnemyBaseBlock block = getEnemyBaseBlock();
+        block.isHead = false;
+        block.x = x;
+        block.y = y;
+        return block;
+    }
+
     private long turn = 0L;
 
     @Override
@@ -87,16 +111,16 @@ public class ApiControllerStub implements Controller {
         unitsResponse.turn = 1;
 
         unitsResponse.zombies = List.of(
-                getZombie()
+                getZombie(), getZombie2()
         );
 
         unitsResponse.base = List.of(
                 getMyBaseBlock(), getMyBaseBlock2(4, 1),
-                getMyBaseBlock2(3, 0), getMyBaseBlock2(3, 20)
+                getMyBaseBlock2(3, 0), getMyBaseBlock2(15, 3)
         );
 
         unitsResponse.enemyBlocks = List.of(
-                getEnemyBaseBlock()
+                getEnemyBaseBlock(), getEnemyBaseBlock2(1, 4)
         );
 
         unitsResponse.turn = turn++;
