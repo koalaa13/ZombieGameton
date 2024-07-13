@@ -6,14 +6,15 @@ import org.example.model.Spot;
 import org.example.model.response.UnitsResponse;
 import org.example.model.response.ZpotsResponse;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Graphics;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
 public class Visualizer extends JFrame {
@@ -38,13 +39,14 @@ public class Visualizer extends JFrame {
     private final int W = 1000;
     private final int W2 = 200;
     private final int H = 800;
-    private final int observeSpace = 12;
+    private int observeSpace = 10;
     private int cellS;
 
     private UnitsResponse game;
     private final ZpotsResponse world;
 
     private JPanel canvas;
+    private JLabel status;
 
     private Obj[][] field = null;
 
@@ -61,16 +63,6 @@ public class Visualizer extends JFrame {
 
         addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
-                if (freeze) return;
-                int x = e.getX();
-                int y = e.getY() - getInsets().top;
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    buildBlock(x, y);
-                    repaint();
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    moveBase(x, y);
-                    repaint();
-                }
             }
 
             public void mouseEntered(MouseEvent arg0) {
@@ -82,7 +74,17 @@ public class Visualizer extends JFrame {
             public void mousePressed(MouseEvent arg0) {
             }
 
-            public void mouseReleased(MouseEvent arg0) {
+            public void mouseReleased(MouseEvent e) {
+                if (freeze) return;
+                int x = e.getX();
+                int y = e.getY() - getInsets().top;
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    buildBlock(x, y);
+                    repaint();
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    moveBase(x, y);
+                    repaint();
+                }
             }
         });
 
@@ -91,8 +93,29 @@ public class Visualizer extends JFrame {
                 paintImpl(g);
             }
         };
+        JPanel sidePanel = new JPanel();
+        sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 
+        status = new JLabel();
+        sidePanel.add(status);
+
+        JSlider slider = new JSlider(5, 13, observeSpace);
+        slider.addChangeListener(e -> setObserveSpace(slider.getValue()));
+        slider.setMajorTickSpacing(1);
+        slider.setPaintLabels(true);
+        slider.setSnapToTicks(true);
+        sidePanel.add(slider);
+
+        JButton button = new JButton("Build random");
+        button.addActionListener(e -> setRandomFutureBlocks());
+        sidePanel.add(button);
+
+        canvas.setMaximumSize(new Dimension(W, H));
+        sidePanel.setMaximumSize(new Dimension(W2, H));
+
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
         add(canvas);
+        add(sidePanel);
         show();
     }
 
@@ -138,17 +161,18 @@ public class Visualizer extends JFrame {
             System.err.println("Cannot draw. No game info");
             return;
         }
+        status.setText("Turn: " + game.turn + "   Gold: " + game.player.gold + (freeze ? "   Frozen" : ""));
+        int rows = field.length;
+        int cols = field[0].length;
         g.setColor(new Color(50, 50, 50));
-        g.drawString("Turn: " + game.turn + "   Gold: " + game.player.gold + (freeze ? "   Frozen" : ""),
-                W + 20, 20);
-        for (int i = 0; i < W; i += cellS) {
-            g.drawLine(i, 0, i, H);
+        for (int i = 0; i < rows + 1; i++) {
+            g.drawLine(i * cellS, 0, i * cellS, cols * cellS);
         }
-        for (int i = 0; i < H; i += cellS) {
-            g.drawLine(0, i, W, i);
+        for (int i = 0; i < cols + 1; i++) {
+            g.drawLine(0, i * cellS, rows * cellS, i * cellS);
         }
-        for (int i = 0; i < field.length; i++) {
-            for (int j = 0; j < field[i].length; j++) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 g.setColor(field[i][j].c);
                 g.fillRect(i * cellS + 1, j * cellS + 1, cellS - 2, cellS - 2);
             }
@@ -171,7 +195,19 @@ public class Visualizer extends JFrame {
         return x >= 0 && y >= 0 && x < field.length && y < field[0].length;
     }
 
-    private boolean checkBuild(int realX, int realY) {
+    private int getSpentGold() {
+        int spentGold = 0;
+        for (Obj[] objs : field) {
+            for (Obj obj : objs) {
+                if (obj == Obj.FUTURE_BLOCK) {
+                    spentGold++;
+                }
+            }
+        }
+        return spentGold;
+    }
+
+    private boolean checkBuild(int realX, int realY, boolean checkGold) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (!checkPoint(realX + i, realY + j)) {
@@ -193,15 +229,9 @@ public class Visualizer extends JFrame {
             if (field[realX][realY + i] == Obj.BASE || field[realX][realY + i] == Obj.BLOCK ||
                     field[realX][realY + i] == Obj.FUTURE_BASE) good = true;
         }
-        int spentGold = 0;
-        for (int i = 0; i < field.length; i++) {
-            for (int j = 0; j < field[i].length; j++) {
-                if (field[i][j] == Obj.FUTURE_BLOCK) {
-                    spentGold++;
-                }
-            }
+        if (checkGold) {
+            good &= getSpentGold() < game.player.gold;
         }
-        good &= spentGold < game.player.gold;
         return good;
     }
 
@@ -212,7 +242,7 @@ public class Visualizer extends JFrame {
             return;
         }
         if (field[realX][realY] == Obj.EMPTY) {
-            if (checkBuild(realX, realY)) {
+            if (checkBuild(realX, realY, true)) {
                 field[realX][realY] = Obj.FUTURE_BLOCK;
             } else {
                 System.err.println("Check buildBlock failed");
@@ -254,14 +284,40 @@ public class Visualizer extends JFrame {
         }
     }
 
-    public void setGame(UnitsResponse game) {
+    public synchronized void setGame(UnitsResponse game) {
         this.game = game;
         initField();
         repaint();
     }
 
-    public void setFreeze(boolean freeze) {
+    public synchronized void setFreeze(boolean freeze) {
         this.freeze = freeze;
+        repaint();
+    }
+
+    private synchronized void setObserveSpace(int observeSpace) {
+        this.observeSpace = observeSpace;
+        repaint();
+    }
+
+    private synchronized void setRandomFutureBlocks() {
+        int remainGold = (int) game.player.gold - getSpentGold();
+        if (remainGold == 0) {
+            System.err.println("No gold left");
+            return;
+        }
+        List<Point> blocks = new ArrayList<>();
+        for (int i = 0; i < field.length; i++) {
+            for (int j = 0; j < field[i].length; j++) {
+                if (field[i][j] == Obj.EMPTY && checkBuild(i, j, false)) {
+                    blocks.add(new Point(i, j));
+                }
+            }
+        }
+        Collections.shuffle(blocks);
+        for (int i = 0; i < Math.min(remainGold, blocks.size()); i++) {
+            field[(int) blocks.get(i).x][(int) blocks.get(i).y] = Obj.FUTURE_BLOCK;
+        }
         repaint();
     }
 
