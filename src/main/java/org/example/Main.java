@@ -19,7 +19,7 @@ import org.example.visual.Visualizer;
 public class Main {
     public static void main(String[] args) throws JsonProcessingException, InterruptedException {
         Controller apiController = ApiController.getInstance();
-//        apiController = new ApiControllerStub();
+        apiController = new ApiControllerStub();
         RegisterResponse registerResponse = apiController.register();
         if (registerResponse == null) {
             System.err.println("error happened while registering");

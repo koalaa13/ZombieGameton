@@ -154,7 +154,7 @@ public class Visualizer extends JFrame {
         sidePanel.add(button2);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        JButton button3 = new JButton("Build only far away");
+        JButton button3 = new JButton("Build circle");
         button3.addActionListener(e -> setFarFutureBlocks(1, true));
         sidePanel.add(button3);
 
@@ -425,7 +425,7 @@ public class Visualizer extends JFrame {
         return achievePoints;
     }
 
-    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer) {
+    private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer, boolean onlySphere) {
         if (freeze) {
             return;
         }
@@ -455,6 +455,13 @@ public class Visualizer extends JFrame {
         if (!denseMode) {
             blocks = blocks.stream().filter(p -> countNeighbours(p) == 1).collect(Collectors.toList());
         }
+        if (onlySphere) {
+            Point finalBasePoint = basePoint;
+            blocks = blocks.stream().filter(p -> {
+                var dist = Utils.dist(p, finalBasePoint);
+                return 6 < dist && dist < 14;
+            }).collect(Collectors.toList());
+        }
         consumer.accept(basePoint, blocks);
         int lim = Math.min(remainGold, blocks.size());
         if (limitGold) {
@@ -467,27 +474,21 @@ public class Visualizer extends JFrame {
     }
 
     private void setRandomFutureBlocks() {
-        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
+        setFutureBlocks((p, blocks) -> Collections.shuffle(blocks), false);
     }
 
-    private void setFarFutureBlocks(int mp, boolean ignoreNear) {
+    private void setFarFutureBlocks(int mp, boolean onlySphere) {
         setFutureBlocks((p, blocks) ->
                 blocks.sort((o1, o2) -> {
                     long v1 = mp * Utils.dist(o1, p);
                     long v2 = mp * Utils.dist(o2, p);
-                    if (0 < v1 && v1 < 25 && ignoreNear) {
-                        v1 -= 1000;
-                    }
-                    if (0 < v2 && v2 < 25 && ignoreNear) {
-                        v2 -= 1000;
-                    }
                     return (int) (v2 - v1);
-                }));
+                }), onlySphere);
     }
 
     private void setDirFutureBlocks(int dX, int dY) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
+                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))), false);
     }
 
     private synchronized void setLimitGold(boolean value) {
