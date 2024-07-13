@@ -138,7 +138,7 @@ public class Visualizer extends JFrame {
         sidePanel.add(slider);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        JCheckBox cb = new JCheckBox("Limit gold (20)");
+        JCheckBox cb = new JCheckBox("Limit gold (10)");
         cb.addItemListener(e -> setLimitGold(cb.isSelected()));
         sidePanel.add(cb);
 
@@ -402,7 +402,7 @@ public class Visualizer extends JFrame {
         consumer.accept(basePoint, blocks);
         int lim = Math.min(remainGold, blocks.size());
         if (limitGold) {
-            lim = Math.min(lim, 1);
+            lim = Math.min(lim, 10);
         }
         for (int i = 0; i < lim; i++) {
             field[(int) blocks.get(i).x][(int) blocks.get(i).y] = Obj.FUTURE_BLOCK;
