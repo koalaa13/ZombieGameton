@@ -15,9 +15,9 @@ import static org.example.attack.Utils.*;
 public class PriorityAttacker implements Attacker {
 
     private static final Map<Zombie.Type, Integer> Priority = Map.of(
-            Zombie.Type.juggernaut, 7500,
-            Zombie.Type.bomber, 5000,
-            Zombie.Type.liner, 4000,
+            Zombie.Type.juggernaut, 5000,
+            Zombie.Type.bomber, 4500,
+            Zombie.Type.liner, 7500,
             Zombie.Type.chaos_knight, 4000,
             Zombie.Type.fast, 3500,
             Zombie.Type.normal, 2000
