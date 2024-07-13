@@ -43,7 +43,7 @@ public class Visualizer extends JFrame {
     }
 
     private final int W = 1200;
-    private final int W2 = 200;
+    private final int W2 = 350;
     private final int H = 1000;
     private int observeSpace = 10;
     private int cellS;
@@ -137,16 +137,39 @@ public class Visualizer extends JFrame {
         sidePanel.add(slider);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
         JButton button = new JButton("Build random");
         button.addActionListener(e -> setRandomFutureBlocks());
         sidePanel.add(button);
 
         sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        JButton button2 = new JButton("Build far away (< 20)");
-        button2.addActionListener(e -> setFarFutureBlocks());
+        JButton button2 = new JButton("Build far away");
+        button2.addActionListener(e -> setFarFutureBlocks(1));
         sidePanel.add(button2);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JButton buttonNear = new JButton("Build near");
+        buttonNear.addActionListener(e -> setFarFutureBlocks(-1));
+        sidePanel.add(buttonNear);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JButton buttonLeft = new JButton("Build left");
+        buttonLeft.addActionListener(e -> setDirFutureBlocks(-1, 0));
+        sidePanel.add(buttonLeft);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JButton buttonRight = new JButton("Build right");
+        buttonRight.addActionListener(e -> setDirFutureBlocks(1, 0));
+        sidePanel.add(buttonRight);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JButton buttonUp = new JButton("Build up");
+        buttonUp.addActionListener(e -> setDirFutureBlocks(0, -1));
+        sidePanel.add(buttonUp);
+
+        sidePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JButton buttonDown = new JButton("Build down");
+        buttonDown.addActionListener(e -> setDirFutureBlocks(0, 1));
+        sidePanel.add(buttonDown);
 
         canvas.setMaximumSize(new Dimension(W, H));
         sidePanel.setMaximumSize(new Dimension(W2, H));
@@ -381,9 +404,14 @@ public class Visualizer extends JFrame {
         setFutureBlocks((p, blocks) -> Collections.shuffle(blocks));
     }
 
-    private void setFarFutureBlocks() {
+    private void setFarFutureBlocks(int mp) {
         setFutureBlocks((p, blocks) ->
-                blocks.sort((o1, o2) -> (int) Utils.dist(o2, p) - (int) Utils.dist(o1, p)));
+                blocks.sort((o1, o2) -> (int) (mp * (Utils.dist(o2, p) - Utils.dist(o1, p)))));
+    }
+
+    private void setDirFutureBlocks(int dX, int dY) {
+        setFutureBlocks((p, blocks) ->
+                blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
     }
 
     public Point getFutureBase() {
