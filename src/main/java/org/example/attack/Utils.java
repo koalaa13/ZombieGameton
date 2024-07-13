@@ -18,21 +18,21 @@ public class Utils {
      * @param unitsResponse информация обо всем
      * @return маппинг кто кого может атаковать
      */
-    public static Map<MyBaseBlock, List<Zombie>> attackMapping(UnitsResponse unitsResponse) {
-        Map<MyBaseBlock, List<Zombie>> res = new HashMap<>();
-        List<Zombie> zombies = unitsResponse.zombies;
-        for (MyBaseBlock block : unitsResponse.base) {
-            res.put(block, new ArrayList<>());
-            for (Zombie zombie : zombies) {
+    public static Map<Zombie, List<MyBaseBlock>> attackMapping(UnitsResponse unitsResponse) {
+        Map<Zombie, List<MyBaseBlock>> res = new HashMap<>();
+        List<MyBaseBlock> base = unitsResponse.base;
+        for (Zombie zombie : unitsResponse.zombies) {
+            res.put(zombie, new ArrayList<>());
+            for (MyBaseBlock block : base) {
                 if (canBaseBlockAttackZombie(block, zombie)) {
-                    res.get(block).add(zombie);
+                    res.get(zombie).add(block);
                 }
             }
         }
         return res;
     }
 
-    public static boolean canBaseBlockAttackZombie(MyBaseBlock block, Zombie zombie) {
+    public static boolean canBaseBlockAttackZombie(MyBaseBlock block, Point zombie) {
         long dist = dist(block, zombie);
         long can = block.range * block.range;
         return dist <= can;
@@ -45,11 +45,6 @@ public class Utils {
     }
     
     public static long turnsToReachBase(Zombie zombie, UnitsResponse unitsResponse) {
-        // Этот долбоеб рандомно ходит, на него похуй
-        if (zombie.type == Zombie.Type.chaos_knight) {
-            return Long.MAX_VALUE;
-        }
-        
         return unitsResponse.base.stream()
                 .filter(bp -> canReachPoint(zombie, bp))
                 .mapToLong(bp -> turnsCountToReachPoint(zombie, bp))
@@ -58,11 +53,6 @@ public class Utils {
     }
 
     public static MyBaseBlock nearestBaseBlock(Zombie zombie, UnitsResponse unitsResponse) {
-        // Этот долбоеб рандомно ходит, на него похуй
-        if (zombie.type == Zombie.Type.chaos_knight) {
-            return null;
-        }
-
         return unitsResponse.base.stream()
                 .filter(bp -> canReachPoint(zombie, bp))
                 .min((bp1, bp2) -> {
@@ -93,7 +83,8 @@ public class Utils {
         long diff = zombie.direction == Zombie.Direction.up || zombie.direction == Zombie.Direction.down ?
                 Math.abs(point.y - zombie.y) :
                 Math.abs(point.x - zombie.x);
-        return diff / zombie.speed + (diff % zombie.speed == 0 ? 0 : 1) + zombie.waitTurns;
+        long speed = (zombie.type == Zombie.Type.chaos_knight) ? 2 : zombie.speed;
+        return diff / speed + (diff % speed == 0 ? 0 : 1) + zombie.waitTurns;
     }
 
     public static ZombieDamageCalculator getCorrectCalculator(Zombie zombie) {

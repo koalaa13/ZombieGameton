@@ -5,6 +5,7 @@ import org.example.api.ApiControllerStub;
 import org.example.api.Controller;
 import org.example.attack.Attacker;
 import org.example.attack.impl.NothingAttacker;
+import org.example.attack.impl.PriorityAttacker;
 import org.example.model.Point;
 import org.example.model.request.AllRequest;
 import org.example.model.request.AllRequestWithBaseMove;
@@ -25,7 +26,7 @@ public class Main {
         }
 
         Visualizer visualizer = new Visualizer(apiController.getZpots());
-        Attacker attacker = new NothingAttacker();
+        Attacker attacker = new PriorityAttacker();
 
         int it = 0;
         long lastTurn = -1;
