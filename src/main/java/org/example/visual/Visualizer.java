@@ -270,6 +270,10 @@ public class Visualizer extends JFrame {
                 g.setColor(Color.MAGENTA);
                 g.fillRect(centerX - 3, centerY - 3, 6, 6);
             }
+            if (cellS > 10 && z.type == Zombie.Type.liner) {
+                g.setColor(Color.CYAN);
+                g.fillRect(centerX - 3, centerY - 3, 6, 6);
+            }
         }
     }
 
@@ -379,17 +383,41 @@ public class Visualizer extends JFrame {
         repaint();
     }
 
-    private boolean isOur(int x, int y) {
-        return field[x][y] == Obj.BASE || field[x][y] == Obj.BLOCK;
+    private boolean isOur(long x, long y) {
+        return field[(int) x][(int) y] == Obj.BASE || field[(int) x][(int) y] == Obj.BLOCK;
     }
 
     private int countNeighbours(Point p) {
         int c = 0;
-        if (isOur((int) p.x - 1, (int) p.y)) c++;
-        if (isOur((int) p.x + 1, (int) p.y)) c++;
-        if (isOur((int) p.x, (int) p.y - 1)) c++;
-        if (isOur((int) p.x, (int) p.y + 1)) c++;
+        if (isOur(p.x - 1, p.y)) c++;
+        if (isOur(p.x + 1, p.y)) c++;
+        if (isOur(p.x, p.y - 1)) c++;
+        if (isOur(p.x, p.y + 1)) c++;
         return c;
+    }
+
+    private void newAchievePoint(Set<Point> achievePoints, Queue<Point> queue, Point newPoint) {
+        if (!achievePoints.contains(newPoint)) {
+            achievePoints.add(newPoint);
+            if (isOur(newPoint.x, newPoint.y)) {
+                queue.add(newPoint);
+            }
+        }
+    }
+
+    private Set<Point> getAchievePoints(Point basePoint) {
+        Set<Point> achievePoints = new HashSet<>();
+        Queue<Point> queue = new ArrayDeque<>();
+        queue.add(basePoint);
+        achievePoints.add(basePoint);
+        while (!queue.isEmpty()) {
+            Point curPoint = queue.poll();
+            for (int i = -1; i <= 1; i += 2) {
+                newAchievePoint(achievePoints, queue, new Point(curPoint.x + i, curPoint.y));
+                newAchievePoint(achievePoints, queue, new Point(curPoint.x, curPoint.y + i));
+            }
+        }
+        return achievePoints;
     }
 
     private synchronized void setFutureBlocks(BiConsumer<Point, List<Point>> consumer) {
@@ -417,6 +445,8 @@ public class Visualizer extends JFrame {
             System.err.println("No base found");
             return;
         }
+        Set<Point> achievePoints = getAchievePoints(basePoint);
+        blocks = blocks.stream().filter(achievePoints::contains).collect(Collectors.toList());
         if (!denseMode) {
             blocks = blocks.stream().filter(p -> countNeighbours(p) == 1).collect(Collectors.toList());
         }
@@ -444,6 +474,7 @@ public class Visualizer extends JFrame {
         setFutureBlocks((p, blocks) ->
                 blocks.sort((o1, o2) -> (int) (dX * (o2.x - o1.x) + dY * (o2.y - o1.y))));
     }
+
     private synchronized void setLimitGold(boolean value) {
         this.limitGold = value;
     }
